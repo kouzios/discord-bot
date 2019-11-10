@@ -1,0 +1,24 @@
+{
+  "name": "discord-bot",
+  "version": "1.0.0",
+  "description": "My discord bot, intended for personal use for the time being.",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kouzios/discord-bot.git"
+  },
+  "keywords": [],
+  "author": "Matthew Kouzios",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kouzios/discord-bot/issues"
+  },
+  "homepage": "https://github.com/kouzios/discord-bot#readme",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "winston": "^3.2.1"
+  }
+}
