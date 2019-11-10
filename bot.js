@@ -1,6 +1,9 @@
-var Discord = require('discord.io');
+const Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
+const googleSpeech = require('@google-cloud/speech')
+
+const googleSpeechClient = new googleSpeech.SpeechClient()
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -9,34 +12,75 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 
-// Initialize Discord Bot
-var bot = new Discord.Client({
-   token: auth.token,
-   autorun: true
-});
+const bot = new Discord.Client();
+bot.login(auth.token);
 
 //https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
-bot.on('ready', function (evt) {
+bot.on('ready', () => {
     logger.info('Connected');
-    logger.info('Logged in as: ');
-    logger.info(bot.username + ' - (' + bot.id + ')');
 });
 
-//https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
-bot.on('message', function (user, userID, channelID, message, evt) {
-    if (message.substring(0, 1) == '!') {
-        var args = message.substring(1).split(' ');
-        var cmd = args[0];
-       
-        args = args.splice(1);
-        switch(cmd) {
-            // !ping
+bot.on('message', msg => {
+    var content = msg.content;
+    if(content.startsWith("!")) {
+        var args = content.substr(1); //Strip away "!"
+        switch(args) {
             case 'ping':
-                bot.sendMessage({
-                    to: channelID,
-                    message: 'Pong!'
-                });
+                msg.reply("Pong!");
             break;
-         }
-     }
+            case 'police':
+                police(msg);
+            break;
+        }
+    }
 });
+
+async function police(msg) {
+    var voiceChannel = msg.member.voiceChannel;
+    if(!voiceChannel){
+        msg.reply("Please join a Voice Channel before issuing the !police command!"); 
+        return
+    }
+    
+    //TODO: On disconnect, disconnect bot
+    voiceChannel.join().then(connection => {
+        // events.on('speaking', (userID, SSRC, speaking) => {
+        //     if (!speaking) {
+        //       return
+        //     }
+        
+        //     console.log(`I'm listening to ${user.username}`)
+        
+        //     // this creates a 16-bit signed PCM, stereo 48KHz stream
+        //     const audioStream = bot.getAudioContext(voiceChannel);
+        //     const requestConfig = {
+        //       encoding: 'LINEAR16',
+        //       sampleRateHertz: 48000,
+        //       languageCode: 'en-US'
+        //     }
+        //     const request = {
+        //       config: requestConfig
+        //     }
+        //     const recognizeStream = googleSpeechClient
+        //       .streamingRecognize(request)
+        //       .on('error', console.error)
+        //       .on('data', response => {
+        //         const transcription = response.results
+        //           .map(result => result.alternatives[0].transcript)
+        //           .join('\n')
+        //           .toLowerCase()
+        //         console.log(`Transcription: ${transcription}`)
+        //       })
+        
+        //     const convertTo1ChannelStream = new ConvertTo1ChannelStream()
+        
+        //     audioStream.pipe(convertTo1ChannelStream).pipe(recognizeStream)
+        
+        //     audioStream.on('end', async () => {
+        //       console.log('audioStream end')
+        //     })
+        //   })
+    })
+}
+
+

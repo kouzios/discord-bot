@@ -1,5 +1,6 @@
 # Discord files
 auth.json
+.env
 
 # Logs
 logs
