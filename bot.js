@@ -1,9 +1,11 @@
 const Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
-const googleSpeech = require('@google-cloud/speech')
+var opus = require('opusscript');
+const googleSpeech  = require('@google-cloud/speech');
+require('dotenv').config()
 
-const googleSpeechClient = new googleSpeech.SpeechClient()
+const googleSpeechClient = new googleSpeech .SpeechClient();
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -26,9 +28,11 @@ bot.on('message', msg => {
         var args = content.substr(1); //Strip away "!"
         switch(args) {
             case 'ping':
+                logger.info("Request for ping pong");
                 msg.reply("Pong!");
             break;
             case 'police':
+                logger.info("Request for police");
                 police(msg);
             break;
         }
@@ -41,45 +45,63 @@ async function police(msg) {
         msg.reply("Please join a Voice Channel before issuing the !police command!"); 
         return
     }
-    
-    //TODO: On disconnect, disconnect bot
+
+    //TODO: On summoner user disconnect, disconnect bot
+    //TODO: Check what happens if in muted channel
+
     voiceChannel.join().then(connection => {
-        // events.on('speaking', (userID, SSRC, speaking) => {
-        //     if (!speaking) {
-        //       return
-        //     }
+        const receiver = connection.createReceiver()
+
+        connection.on('speaking', (userID, speaking) => {
+            if (!speaking) {
+                logger.info(userID + " not speaking")
+                return
+            }
         
-        //     console.log(`I'm listening to ${user.username}`)
+            logger.info(`I'm listening to ${userID}`)
         
-        //     // this creates a 16-bit signed PCM, stereo 48KHz stream
-        //     const audioStream = bot.getAudioContext(voiceChannel);
-        //     const requestConfig = {
-        //       encoding: 'LINEAR16',
-        //       sampleRateHertz: 48000,
-        //       languageCode: 'en-US'
-        //     }
-        //     const request = {
-        //       config: requestConfig
-        //     }
-        //     const recognizeStream = googleSpeechClient
-        //       .streamingRecognize(request)
-        //       .on('error', console.error)
-        //       .on('data', response => {
-        //         const transcription = response.results
-        //           .map(result => result.alternatives[0].transcript)
-        //           .join('\n')
-        //           .toLowerCase()
-        //         console.log(`Transcription: ${transcription}`)
-        //       })
+            // this creates a 16-bit signed PCM, stereo 48KHz stream
+            const audioStream = receiver.createPCMStream(userID);
+
+            const request = {
+                config: {
+                    encoding: 'LINEAR16',
+                    sampleRateHertz: 48000,
+                    languageCode: 'en-US'
+                },
+                interimResults: false
+            }
+
+            const recognizeStream = googleSpeechClient
+                .streamingRecognize(request)
+                .on('error', console.error)
+                .on('data', response => {
+                    const transcription = response.results
+                    .map(result => result.alternatives[0].transcript)
+                    .join('\n')
+                    .toLowerCase()
+                    logger.info(`Transcription: ${transcription}`)
+            })
+
+            recorder.record({
+                sampleRateHertz: 48000,
+                threshold: 0,
+                verbose: false,
+                recordProgram: 'rec',
+                silence: '10.0',
+            })
+            .stream()
+            .on('error', console.error)
+            .pipe(recognizeStream)
         
-        //     const convertTo1ChannelStream = new ConvertTo1ChannelStream()
+            // const convertTo1ChannelStream = new ConvertTo1ChannelStream()
         
-        //     audioStream.pipe(convertTo1ChannelStream).pipe(recognizeStream)
+            // audioStream.pipe(convertTo1ChannelStream).pipe(recognizeStream)
         
-        //     audioStream.on('end', async () => {
-        //       console.log('audioStream end')
-        //     })
-        //   })
+            // audioStream.on('end', async () => {
+            //     logger.info('audioStream end')
+            // })
+        })
     })
 }
 
