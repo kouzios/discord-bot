@@ -4,7 +4,8 @@
   "description": "My discord bot, intended for personal use for the time being.",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node ./public/bot.js",
+    "build": "npm build ./"
   },
   "repository": {
     "type": "git",
