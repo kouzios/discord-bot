@@ -56,8 +56,10 @@ async function flame(msg, target) {
     
         if(target == "me" || target == "myself") {
             text = "Consider yourself officially flamed, " + msg.author.username;
+            text += "     ";
         } else {
             text = "Consider yourself officially flamed, " + target;
+            text += "     ";
         }
     
         const client = new textToSpeech.TextToSpeechClient();
@@ -80,13 +82,16 @@ async function flame(msg, target) {
         logger.info('Audio content written to file: flame.mp3');
     
         voiceChannel.join().then(connection => {
-            const dispatcher = connection.playFile('./flame.mp3');
+            dispatcher = connection.playFile('./flame.mp3');
             dispatcher.on('end', () => {
-                //Disconnect from voice channel and delete our file
-                voiceChannel.leave();
-                fs.unlinkSync("./flame.mp3");
-                logger.info("Disconnected from Voice Channel");
-                done();
+                //Add wait to allow file time to be played (can be an issue on VM)
+                setTimeout(() => {
+                    //Disconnect from voice channel and delete our file
+                    voiceChannel.leave();
+                    //fs.unlinkSync("./flame.mp3");
+                    logger.info("Disconnected from Voice Channel");
+                    done();
+                }, 1000);
             });
         });
     })
