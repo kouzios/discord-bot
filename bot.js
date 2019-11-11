@@ -82,16 +82,15 @@ async function flame(msg, target) {
         logger.info('Audio content written to file: flame.mp3');
     
         voiceChannel.join().then(connection => {
-            dispatcher = connection.playFile('./flame.mp3');
+            const stream = fs.createReadStream('./flame.mp3');
+            dispatcher = connection.playStream(stream);
+            // dispatcher = connection.playFile('./flame.mp3');
             dispatcher.on('end', () => {
-                //Add wait to allow file time to be played (can be an issue on VM)
-                setTimeout(() => {
-                    //Disconnect from voice channel and delete our file
-                    voiceChannel.leave();
-                    //fs.unlinkSync("./flame.mp3");
-                    logger.info("Disconnected from Voice Channel");
-                    done();
-                }, 1000);
+                //Disconnect from voice channel and delete our file
+                voiceChannel.leave();
+                fs.unlinkSync("./flame.mp3");
+                logger.info("Disconnected from Voice Channel");
+                done();
             });
         });
     })
