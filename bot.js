@@ -34,14 +34,14 @@ bot.on('message', msg => {
                 msg.reply("Please specify only the command, and target of the flame (without spaces in the flames name).");
                 logger.info("User " + msg.author.username + " gave an improper number of parameters");
                 return;
-            }
-
+            } 
+            
             if(args[1].length > 30) {
                 msg.reply("Please limit your flame target to 30 characters");
                 logger.info("User " + msg.author.username + " provided a flame target of >30 characters");
                 return;
-            }
-
+            } 
+            
             logger.info("User " + msg.author.username + " requested a flame on: " +  args[1]);
             flame(msg, args[1]);
         }
@@ -56,12 +56,14 @@ async function flame(msg, target) {
         if(!voiceChannel){
             msg.reply("Please join a Voice Channel before issuing the !flame command!"); 
             logger.info("User " + msg.author.username + " requested bot without being in a VC")
+            done();
             return;
         }
     
         if(voiceChannel.full == true) {
             msg.reply("Your Voice Channel is full");
             logger.info("Bot attempted to join full VC")
+            done();
             return;
         }
     
@@ -88,6 +90,7 @@ async function flame(msg, target) {
         } catch(err) {
             msg.reply("Google isn't happy with this many request being made, wait up a bit.");
             logger.error(err)
+            done();
             return;
         }
     
@@ -108,7 +111,6 @@ async function flame(msg, target) {
                         fs.unlinkSync("./flame.mp3");
                     } catch (err) {
                         logger.error(err);
-                        return;
                     }
                     done();
                 });
@@ -117,6 +119,7 @@ async function flame(msg, target) {
             logger.error(err);
         }
     })
+    return;
 }
 
 
