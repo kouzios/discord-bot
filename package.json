@@ -20,6 +20,8 @@
   "homepage": "https://github.com/kouzios/discord-bot#readme",
   "dependencies": {
     "@google-cloud/speech": "^3.3.2",
+    "@google-cloud/text-to-speech": "^1.4.1",
+    "async-lock": "^1.2.2",
     "discord.js": "^11.5.1",
     "dotenv": "^8.2.0",
     "ffmpeg": "0.0.4",
