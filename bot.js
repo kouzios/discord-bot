@@ -28,13 +28,21 @@ bot.on('message', msg => {
     var content = msg.content;
     if(content.startsWith("!")) {
         var args = content.substr(1).split(" "); //Strip away "!", break into command and param
-        if(args.length != 2) {
-            msg.reply("Please specify only the command, and the target of the flame");
-            return;
-        }
 
         if(args[0] == "flame") {
-            logger.info("Request for flame on: " +  args[1]);
+            if(args.length != 2) {
+                msg.reply("Please specify only the command, and target of the flame (without spaces in the flames name).");
+                logger.info("User " + msg.author.username + " gave an improper number of parameters");
+                return;
+            }
+
+            if(args[1].length > 30) {
+                msg.reply("Please limit your flame target to 30 characters");
+                logger.info("User " + msg.author.username + " provided a flame target of >30 characters");
+                return;
+            }
+
+            logger.info("User " + msg.author.username + " requested a flame on: " +  args[1]);
             flame(msg, args[1]);
         }
     }
@@ -43,21 +51,22 @@ bot.on('message', msg => {
 async function flame(msg, target) {
     lock.acquire(msg, async function(done) {
         var text;
+        var response;
         var voiceChannel = msg.member.voiceChannel;
         if(!voiceChannel){
-            msg.reply("Please join a Voice Channel before issuing the !police command!"); 
-            return
+            msg.reply("Please join a Voice Channel before issuing the !flame command!"); 
+            logger.info("User " + msg.author.username + " requested bot without being in a VC")
+            return;
         }
     
         if(voiceChannel.full == true) {
             msg.reply("Your Voice Channel is full");
+            logger.info("Bot attempted to join full VC")
             return;
         }
     
         if(target == "me" || target == "myself") {
             text = "Consider yourself officially flamed, " + msg.author.username;
-        } else if(target == "yourself") {
-            text = "OOF, OUCH, MY BONES";
         } else {
             text = "Consider yourself officially flamed, " + target;
         }
@@ -74,24 +83,39 @@ async function flame(msg, target) {
         };
     
         // Performs the Text-to-Speech request
-        const [response] = await client.synthesizeSpeech(request);
+        try {
+            [response] = await client.synthesizeSpeech(request);
+        } catch(err) {
+            msg.reply("Google isn't happy with this many request being made, wait up a bit.");
+            logger.error(err)
+            return;
+        }
     
         // Write the binary audio content to a local file
         const writeFile = util.promisify(fs.writeFile);
         await writeFile('flame.mp3', response.audioContent, 'binary');
         logger.info('Audio content written to file: flame.mp3');
     
-        voiceChannel.join().then(connection => {
-            const stream = fs.createReadStream('./flame.mp3');
-            dispatcher = connection.playStream(stream);
-            dispatcher.on('end', () => {
-                //Disconnect from voice channel and delete our file
-                voiceChannel.leave();
-                fs.unlinkSync("./flame.mp3");
-                logger.info("Disconnected from Voice Channel");
-                done();
+        try {
+            voiceChannel.join().then(connection => {
+                const stream = fs.createReadStream('./flame.mp3');
+                dispatcher = connection.playStream(stream);
+                dispatcher.on('end', () => {
+                    //Disconnect from voice channel and delete our file
+                    voiceChannel.leave();
+                    logger.info("Disconnected from Voice Channel");
+                    try {
+                        fs.unlinkSync("./flame.mp3");
+                    } catch (err) {
+                        logger.error(err);
+                        return;
+                    }
+                    done();
+                });
             });
-        });
+        } catch(err) {
+            logger.error(err);
+        }
     })
 }
 
