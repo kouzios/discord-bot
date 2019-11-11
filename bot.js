@@ -56,10 +56,10 @@ async function flame(msg, target) {
     
         if(target == "me" || target == "myself") {
             text = "Consider yourself officially flamed, " + msg.author.username;
-            text += "     ";
+        } else if(target == "yourself") {
+            text = "OOF, OUCH, MY BONES";
         } else {
             text = "Consider yourself officially flamed, " + target;
-            text += "     ";
         }
     
         const client = new textToSpeech.TextToSpeechClient();
@@ -84,7 +84,6 @@ async function flame(msg, target) {
         voiceChannel.join().then(connection => {
             const stream = fs.createReadStream('./flame.mp3');
             dispatcher = connection.playStream(stream);
-            // dispatcher = connection.playFile('./flame.mp3');
             dispatcher.on('end', () => {
                 //Disconnect from voice channel and delete our file
                 voiceChannel.leave();
