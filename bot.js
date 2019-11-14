@@ -44,9 +44,52 @@ bot.on('message', msg => {
             
             logger.info("User " + msg.author.username + " requested a flame on: " +  args[1]);
             flame(msg, args[1]);
+        } else if(args[0] == "suplex") {
+            if(args.length != 1) {
+                msg.reply("Please specify only the command, no extra parameters");
+                logger.info("User " + msg.author.username + " gave an improper number of parameters");
+                return;
+            }
+
+            logger.info("User " + msg.author.username + " requested a suplex");
+            suplex(msg);
         }
     }
 });
+
+async function suplex(msg, target) {
+    lock.acquire(msg, async function(done) {
+        var voiceChannel = msg.member.voiceChannel;
+        if(!voiceChannel){
+            msg.reply("Please join a Voice Channel before issuing the !suplex command!"); 
+            logger.info("User " + msg.author.username + " requested bot without being in a VC")
+            done();
+            return;
+        }
+    
+        if(voiceChannel.full == true) {
+            msg.reply("Your Voice Channel is full");
+            logger.info("Bot attempted to join full VC")
+            done();
+            return;
+        }
+
+        try {
+            voiceChannel.join().then(connection => {
+                dispatcher = connection.playFile('./resources/suplex.mp4');
+                dispatcher.on('end', () => {
+                    //Disconnect from voice channel
+                    voiceChannel.leave();
+                    logger.info("Disconnected from Voice Channel");
+                    done();
+                });
+            });
+        } catch(err) {
+            logger.error(err);
+        }
+    })
+    return;
+}
 
 async function flame(msg, target) {
     lock.acquire(msg, async function(done) {
@@ -96,19 +139,19 @@ async function flame(msg, target) {
     
         // Write the binary audio content to a local file
         const writeFile = util.promisify(fs.writeFile);
-        await writeFile('flame.mp3', response.audioContent, 'binary');
+        await writeFile('./resources/flame.mp3', response.audioContent, 'binary');
         logger.info('Audio content written to file: flame.mp3');
     
         try {
             voiceChannel.join().then(connection => {
-                const stream = fs.createReadStream('./flame.mp3');
+                const stream = fs.createReadStream('./resources/flame.mp3');
                 dispatcher = connection.playStream(stream);
                 dispatcher.on('end', () => {
                     //Disconnect from voice channel and delete our file
                     voiceChannel.leave();
                     logger.info("Disconnected from Voice Channel");
                     try {
-                        fs.unlinkSync("./flame.mp3");
+                        fs.unlinkSync("./resources/flame.mp3");
                     } catch (err) {
                         logger.error(err);
                     }
