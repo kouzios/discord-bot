@@ -24,11 +24,17 @@ bot.on('ready', () => {
     logger.info('Connected');
 });
 
+/**
+ * Handles whenever a message is sent into the discord server, irrespective of channels
+ */
 bot.on('message', msg => {
     var content = msg.content;
+
+    //Verify the message was actually a command
     if(content.startsWith("!")) {
         var args = content.substr(1).split(" "); //Strip away "!", break into command and param
 
+        //Switch through to determine how we handle the command
         if(args[0] == "flame") {
             if(args.length != 2) {
                 msg.reply("Please specify only the command, and target of the flame (without spaces in the flames name).");
@@ -57,7 +63,12 @@ bot.on('message', msg => {
     }
 });
 
-async function suplex(msg, target) {
+/**
+ * Plays the suplex.mp4 as audio in the user's VC
+ * 
+ * @param {*} msg Message object carried down from our caller
+ */
+async function suplex(msg) {
     lock.acquire(msg, async function(done) {
         var voiceChannel = msg.member.voiceChannel;
         if(!voiceChannel){
@@ -91,6 +102,13 @@ async function suplex(msg, target) {
     return;
 }
 
+/**
+ * Interfaces with Google text-to-speech to translate our text string coupled 
+ * with given users name to output in the user's VC
+ * 
+ * @param {*} msg The message object carried down from our caller
+ * @param {*} target The target user to flame
+ */
 async function flame(msg, target) {
     lock.acquire(msg, async function(done) {
         var text;
@@ -110,6 +128,7 @@ async function flame(msg, target) {
             return;
         }
     
+        //Builds our string to convert to speech
         if(target == "me" || target == "myself") {
             text = "Consider yourself officially flamed, " + msg.author.username;
         } else {
@@ -121,9 +140,7 @@ async function flame(msg, target) {
         // Construct the request
         const request = {
             input: {text: text},
-            // Select the language and SSML Voice Gender (optional)
             voice: {languageCode: 'en-US', ssmlGender: 'NEUTRAL'},
-            // Select the type of audio encoding
             audioConfig: {audioEncoding: 'MP3'},
         };
     
@@ -131,7 +148,7 @@ async function flame(msg, target) {
         try {
             [response] = await client.synthesizeSpeech(request);
         } catch(err) {
-            msg.reply("Google isn't happy with this many request being made, wait up a bit.");
+            msg.reply("Unable to interface with google's text-to-speech API right now, sorry!.");
             logger.error(err)
             done();
             return;
