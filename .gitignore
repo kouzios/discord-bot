@@ -1,6 +1,7 @@
-# Discord files
+# Project Files
+google-credentials.json
+flame.mp3
 auth.json
-.env
 
 # Logs
 logs
