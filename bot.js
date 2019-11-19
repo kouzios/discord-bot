@@ -25,34 +25,52 @@ bot.on('ready', () => {
 });
 
 bot.on('message', msg => {
-    var content = msg.content;
+    var command = "";
+    var params = "";
+    const content = msg.content;
+
     if(content.startsWith("!")) {
-        var args = content.substr(1).split(" "); //Strip away "!", break into command and param
+        var args = content.substr(1); // Strip away !
 
-        if(args[0] == "flame") {
-            if(args.length != 2) {
-                msg.reply("Please specify only the command, and target of the flame (without spaces in the flames name).");
-                logger.info("User " + msg.author.username + " gave an improper number of parameters");
-                return;
-            } 
-            
-            if(args[1].length > 30) {
-                msg.reply("Please limit your flame target to 30 characters");
-                logger.info("User " + msg.author.username + " provided a flame target of >30 characters");
-                return;
-            } 
-            
-            logger.info("User " + msg.author.username + " requested a flame on: " +  args[1]);
-            flame(msg, args[1]);
-        } else if(args[0] == "suplex") {
-            if(args.length != 1) {
-                msg.reply("Please specify only the command, no extra parameters");
-                logger.info("User " + msg.author.username + " gave an improper number of parameters");
-                return;
-            }
+        //If there's a given parameter
+        if(args.indexOf(' ') != -1) {
+            command = args.substr(0, args.indexOf(' ')); // Break off param
+            params = args.substr(args.indexOf(' ') + 1); //Break off command
+        } else {
+            command = args;
+        }
+        
+        console.log(command);
+        console.log(params);
 
-            logger.info("User " + msg.author.username + " requested a suplex");
-            suplex(msg);
+        //Switch through to determine how we handle the command
+        switch(command){
+            case "flame":
+                if(params.length <= 0) {
+                    msg.reply("Please specify a target for your flame!");
+                    logger.info("User " + msg.author.username + " requested a flame without a target");
+                    return;
+                }
+                
+                if(params.length > 30) {
+                    msg.reply("Please limit your flame target to 30 characters");
+                    logger.info("User " + msg.author.username + " provided a flame target of >30 characters");
+                    return;
+                } 
+                
+                logger.info("User " + msg.author.username + " requested a flame on: " +  params);
+                flame(msg, params);
+                break;
+            case "suplex":
+                if(params.length > 0) {
+                    msg.reply("Please specify only the command, no extra parameters");
+                    logger.info("User " + msg.author.username + " gave an improper number of parameters");
+                    return;
+                }
+    
+                logger.info("User " + msg.author.username + " requested a suplex");
+                suplex(msg);
+                break;
         }
     }
 });
