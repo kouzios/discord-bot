@@ -42,9 +42,6 @@ bot.on('message', msg => {
         } else {
             command = args;
         }
-        
-        console.log(command);
-        console.log(params);
 
         //Switch through to determine how we handle the command
         switch(command){
