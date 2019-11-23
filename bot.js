@@ -20,6 +20,8 @@ logger.level = 'debug';
 const bot = new Discord.Client();
 bot.login(auth.token);
 
+const maxChars = 150;
+
 bot.on('ready', () => {
     logger.info('Connected');
 });
@@ -52,8 +54,8 @@ bot.on('message', msg => {
                     return;
                 }
                 
-                if(params.length > 30) {
-                    msg.reply("Please limit your flame target to 30 characters");
+                if(params.length > maxChars) {
+                    msg.reply("Please limit your flame target to " + maxChars + " characters");
                     logger.info("User " + msg.author.username + " provided a flame target of >30 characters");
                     return;
                 } 
