@@ -162,7 +162,7 @@ async function flame(msg, target) {
         try {
             [response] = await client.synthesizeSpeech(request);
         } catch(err) {
-            msg.reply("Unable to interface with google's text-to-speech API right now, sorry!.");
+            msg.reply("Unable to interface with google's text-to-speech API right now, sorry!");
             logger.error(err)
             done();
             return;
