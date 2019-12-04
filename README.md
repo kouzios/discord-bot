@@ -3,7 +3,7 @@ My discord bot, intended for jokes between friends - but you can add it to your 
 
 # How to use the code itself?
 
-0: Have node installed on your machine, along with npm. At least version 8.13, due to some dependancies.
+0: Have node [^8.13.0 or >= 10.10.0] installed on your machine, along with npm. 
 
 1: Install FFMPEG (dependant on system type)
 
