@@ -7,26 +7,23 @@ My discord bot, intended for jokes between friends - but you can add it to your 
 
 1: Install FFMPEG (dependant on system type)
 
-2: npm i
+2: Run `npm install` to install node's dependencies
 
-3: add auth.json based on copy.auth.json format - the key being the discord auth key
+3: Add `auth.json` based on `copy.auth.json` format - the key being the discord auth key
 
-4: add .env based on copy.env
+4: add `.env` based on `copy.env`
 
-5: add google-credentials.json from the private key retrieved from your google cloud speech-to-text project
+5. Create a Google cloud speech-to-text project, and create a public/private key pair
 
-Then you can add it to your discord server via the [developer apps portal](https://discordapp.com/developers/applications/) for discord, populating auth.json with the discord auth key provided by that app bot.
+5: Download the key file as JSON format, and name it as `google-credentials.json` at the topmost level of the project
+
+6. Add it to your discord server via the [developer apps portal](https://discordapp.com/developers/applications/), populating your `auth.json` with the discord Token provided under the application's bot tab
+
+7. Under the Oauth2 tab, select your desired permissions for the bot. Then, copy the link and use it to invite the bot to your servers!
 
 # Avaliable Commands?
 
 ```
-# Flames a user, truly a savage maneuver
+# Flames a user, truly a savage maneuver (Consider yourself officially flame: [user])
 !flame [user]
-```
-
-and
-
-```
-# Plays a suplex audio file, clipped from Kemono Michi: Rise Up
-!suplex
 ```
