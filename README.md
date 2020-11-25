@@ -22,8 +22,14 @@ My discord bot, intended for jokes between friends - but you can add it to your 
 7. Under the Oauth2 tab, select your desired permissions for the bot. Then, copy the link and use it to invite the bot to your servers!
 
 # Avaliable Commands?
+Note: ```[@User]``` Represents a Discord's user tag predicated by @
 
 ```
-# Flames a user, truly a savage maneuver (Consider yourself officially flame: [user])
-!flame [user]
+# Flames a user, truly a savage maneuver ("Consider yourself officially flamed: [@User]")
+!flame [@User]
+```
+
+```
+#Plays an audio file that counts down from 3
+!suplex [@User]
 ```
