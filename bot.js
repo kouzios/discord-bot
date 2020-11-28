@@ -17,7 +17,7 @@ logger.add(new logger.transports.Console(), {
 });
 logger.level = "debug";
 
-const bot = new Discord.Client();
+const bot = new Discord.Client({ disableEveryone: true });
 bot.login(auth.token);
 
 const maxChars = 150;
@@ -61,7 +61,14 @@ bot.on("message", (msg) => {
     }
     logger.info("User " + msg.author.username + " requested a test");
     let target = params[0];
-    target = target.match(/[0-9]/g).join(""); //Keep only numbers
+    target = target.match(/[0-9]/g);
+    if(!target) {
+      msg.reply(
+        "Please specify a valid user by using the Discord '@' symbol then clicking on the desired user"
+      );
+      return;
+    }
+    target = target.join(""); //Keep only numbers
     /* End param block */
 
     switch (command) {
@@ -100,7 +107,6 @@ const suplex = async (msg, target) => {
         dispatcher.on("end", () => {
           //Disconnect from voice channel
           voiceChannel.leave();
-          logger.info("Disconnected from Voice Channel");
           done();
         });
       });
@@ -196,11 +202,6 @@ const getMember = (msg, target) => {
 
   if (members.length === 0) {
     msg.reply("There are no members of that tag in the discord!");
-    logger.info(
-      "User " +
-        msg.author.username +
-        " requested incorrect member tag for bot summoning"
-    );
     return null;
   }
   return members[0][1]; //Simplify our array to get rid of parent array (only 1 element), and id (position 0 in sub-array)
@@ -215,16 +216,12 @@ const getVoiceChannel = (msg, member) => {
     msg.reply(
       "Unable to complete request, member is not in a discord voice channel."
     );
-    logger.info(
-      "Failed attempt to summon bot due to target not being in a VC"
-    );
     return null;
   }
 
   const voiceChannel = channels.get(voiceChannelID);
   if (voiceChannel.full == true) {
     msg.reply("Your Voice Channel is full");
-    logger.info("Bot attempted to join full VC");
     return null;
   }
   
