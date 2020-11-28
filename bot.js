@@ -36,7 +36,6 @@ bot.on("message", (msg) => {
 
   if (content.startsWith("!")) {
     var args = content.substr(1); // Strip away !
-    console.log(args);
 
     //If there's a given parameter
     if (args.indexOf(" ") != -1) {
@@ -52,14 +51,8 @@ bot.on("message", (msg) => {
       msg.reply(
         "Please specify the !command, and the @User required to target your command [Ex: !flame @Kouz]"
       );
-      logger.info(
-        "User " +
-          msg.author.username +
-          " gave an improper number of parameters"
-      );
       return;
     }
-    logger.info("User " + msg.author.username + " requested a test");
     let target = params[0];
     target = target.match(/[0-9]/g);
     if(!target) {
@@ -103,8 +96,8 @@ const suplex = async (msg, target) => {
     
     try {
       voiceChannel.join().then((connection) => {
-        dispatcher = connection.playFile("./resources/suplex.mp4");
-        dispatcher.on("end", () => {
+        dispatcher = connection.play("./resources/suplex.mp4");
+        dispatcher.on("finish", () => {
           //Disconnect from voice channel
           voiceChannel.leave();
           done();
@@ -114,7 +107,6 @@ const suplex = async (msg, target) => {
       msg.reply(
         "An unexpected error occured while attempting to join the voice channel!"
       );
-      console.log(err);
       logger.error(err);
       done();
       return;
@@ -156,7 +148,6 @@ const flame = async(msg, target) => {
     try {
       [response] = await client.synthesizeSpeech(request);
     } catch (err) {
-      console.log(err);
       msg.reply(
         "Unable to interface with google's text-to-speech API right now, sorry!"
       );
@@ -171,10 +162,11 @@ const flame = async(msg, target) => {
     logger.info("Audio content written to file: flame.mp3");
 
     try {
+      const stream = fs.createReadStream("./resources/flame.mp3");
+
       voiceChannel.join().then((connection) => {
-        const stream = fs.createReadStream("./resources/flame.mp3");
-        dispatcher = connection.playStream(stream);
-        dispatcher.on("end", () => {
+        dispatcher = connection.play(stream);
+        dispatcher.on("finish", () => {
           //Disconnect from voice channel and delete our file
           voiceChannel.leave();
           logger.info("Disconnected from Voice Channel");
@@ -195,7 +187,7 @@ const flame = async(msg, target) => {
 
 const getMember = (msg, target) => {
   //Get all members, then filted to specified target
-  let members = [...msg.guild.members];
+  let members = [...msg.guild.members.cache];
   members.filter((member) => {
     return member.id === target; //If the specified user matches a user in any channel
   });
@@ -208,10 +200,10 @@ const getMember = (msg, target) => {
 }
 
 const getVoiceChannel = (msg, member) => {
-  let channels = new Map([...msg.guild.channels]);
+  let channels = new Map([...msg.guild.channels.cache]);
 
   //Get voice channel from our member's existing voice channel location
-  const voiceChannelID = member.voiceChannelID;
+  const voiceChannelID = member.voice.channelID;
   if (!voiceChannelID) {
     msg.reply(
       "Unable to complete request, member is not in a discord voice channel."
